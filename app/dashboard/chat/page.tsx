@@ -40,6 +40,14 @@ export default function ChatPage() {
     useEffect(() => {
         if (!user) return;
 
+        const firstName = user.displayName?.split(" ")[0] || "there";
+        setMessages(prev => {
+            if (prev.length === 1 && prev[0].role === "assistant") {
+                return [{ role: "assistant", content: `Hello ${firstName}! I'm CoinTrack AI. I have access to your real expense data. How can I help you with your finances today?` }];
+            }
+            return prev;
+        });
+
         // Fetch expenses
         const qExpenses = query(
             collection(db, "users", user.uid, "expenses"),
@@ -138,8 +146,8 @@ export default function ChatPage() {
                 monthlyRecurringCommitments: monthlyRecurringTotal,
                 categoryBreakdown: categoryTotals,
                 budgets: budgets,
-                incomes: incomes.map(inc => `${inc.year}-${inc.month + 1}: ₹${inc.amount}`).join(", "),
-                recurringList: recurring.map(r => `${r.name}: ₹${r.amount} (${r.frequency})`).join(", "),
+                incomes: incomes.map(inc => `  - ${inc.year}-${inc.month + 1}: ₹${inc.amount}`).join("\n"),
+                recurringList: recurring.map(r => `  - ${r.name}: ₹${r.amount} (${r.frequency})`).join("\n"),
                 fullHistory: expenses.slice(0, 30).map(exp =>
                     `- ${exp.date.toDate().toLocaleDateString()}: ${exp.category} - ${exp.note ? '(' + exp.note + ') ' : ''}₹${exp.amount.toFixed(2)}`
                 ).join("\n")

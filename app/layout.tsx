@@ -12,6 +12,7 @@ export const metadata: Metadata = {
 
 import { ThemeProvider } from "@/components/theme-provider";
 import StyledComponentsRegistry from "@/lib/registry";
+import { LenisProvider } from "@/components/lenis-provider";
 
 export default function RootLayout({
   children,
@@ -27,7 +28,9 @@ export default function RootLayout({
             defaultTheme="light"
             enableSystem
           >
-            <AuthProvider>{children}</AuthProvider>
+            <LenisProvider>
+              <AuthProvider>{children}</AuthProvider>
+            </LenisProvider>
           </ThemeProvider>
         </StyledComponentsRegistry>
       </body>

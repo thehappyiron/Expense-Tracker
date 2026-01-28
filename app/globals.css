@@ -139,6 +139,16 @@
     background-attachment: fixed;
     background-blend-mode: soft-light;
   }
+
+  /* Premium Selection Style */
+  ::selection {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 /* Font display classes for hero landing page */

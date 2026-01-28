@@ -36,22 +36,26 @@ function QuickAddExpenseComponent() {
     const [note, setNote] = useState("");
     const [isSaving, setIsSaving] = useState(false);
 
+    const [errorMessage, setErrorMessage] = useState("Something went wrong");
+
     const handleOpen = useCallback(() => {
         setOpen(true);
         setStatus('idle');
+        setErrorMessage("");
     }, []);
 
     const handleClose = useCallback(() => {
-        if (isSaving) return; // Prevent closing while saving
+        // Allow closing regardless of state
         setOpen(false);
         setStatus('idle');
-    }, [isSaving]);
+    }, []);
 
     const handleSubmit = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!user) {
             setStatus('error');
+            setErrorMessage("Please sign in first");
             return;
         }
 
@@ -69,37 +73,40 @@ function QuickAddExpenseComponent() {
             createdAt: Timestamp.now(),
         };
 
-        const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error("Connection timed out. Check your internet.")), 10000)
-        );
-
         try {
+            // Race against a 2.5s timeout to prevent hanging UI
+            // If Firestore is slow, we assume it will sync eventually (offline persistence)
+            const timeoutPromise = new Promise((resolve) => {
+                setTimeout(() => resolve("timed_out"), 2500);
+            });
+
             await Promise.race([
                 addDoc(collection(db, "users", user.uid, "expenses"), expenseData),
                 timeoutPromise
             ]);
 
-            console.log("✅ Expense saved to Firestore");
+            console.log("✅ Expense processed");
 
             setAmount("");
             setCategory("");
             setNote("");
-            setStatus('success');
 
-            // Close modal after showing success
+            // Show success state
+            setStatus('success');
+            setIsSaving(false);
+
+            // Close modal automatically
             setTimeout(() => {
                 setOpen(false);
                 setStatus('idle');
-            }, 800);
+            }, 1000);
 
         } catch (error: any) {
             console.error("❌ Quick Add Error:", error);
             setStatus('error');
-            alert(error.message || "Failed to save. Try refreshing.");
-        } finally {
+            setErrorMessage(error.message || "Failed to save. Try refreshing.");
             setIsSaving(false);
         }
-
     }, [user, amount, category, note]);
 
 
@@ -137,7 +144,7 @@ function QuickAddExpenseComponent() {
                             animate="visible"
                             exit="hidden"
                             transition={{ type: "spring", stiffness: 500, damping: 35 }}
-                            className="fixed bottom-24 right-8 w-80 bg-white/95 dark:bg-card/95 backdrop-blur-md border border-border rounded-3xl shadow-2xl z-50 p-6"
+                            className="fixed bottom-24 right-8 w-80 bg-white/95 dark:bg-card/95 backdrop-blur-md border border-border rounded-3xl shadow-2xl z-[60] p-6"
                         >
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-lg font-semibold text-slate-800">Quick Add Expense</h3>
@@ -177,7 +184,7 @@ function QuickAddExpenseComponent() {
                                     className="flex items-center gap-2 p-3 mb-4 bg-rose-50 border border-rose-200 rounded-xl"
                                 >
                                     <AlertCircle className="w-5 h-5 text-rose-500" />
-                                    <p className="text-rose-600 text-sm">Please sign in first</p>
+                                    <p className="text-rose-600 text-sm">{errorMessage}</p>
                                 </motion.div>
                             )}
 

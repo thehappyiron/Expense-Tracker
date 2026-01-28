@@ -1,7 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { Manrope } from "next/font/google"
-import LenisProvider from "@/components/landing/lenis-provider"
+import { LenisProvider } from "@/components/landing/lenis-provider"
 
 const manrope = Manrope({
     subsets: ["latin"],
