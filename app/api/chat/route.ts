@@ -74,7 +74,7 @@ Time: ${context?.time || new Date().toLocaleString()}
 
 Question: ${message}`;
 
-        console.log("Calling DeepSeek R1 with real data...");
+        console.log("Calling DeepSeek R1 (0528:free) with real data...");
 
         const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
             method: "POST",
@@ -99,9 +99,16 @@ Question: ${message}`;
 
         if (!response.ok) {
             console.error("OpenRouter API Error:", response.status, responseText);
-            const errorData = JSON.parse(responseText);
+            let errorMessage = "Unknown error";
+            try {
+                const errorData = JSON.parse(responseText);
+                errorMessage = errorData.error?.message || errorData.error || responseText;
+            } catch (e) {
+                errorMessage = responseText || "Empty response from provider";
+            }
+
             return NextResponse.json({
-                response: `⚠️ AI service error: ${errorData.error?.message || 'Unknown error'}`
+                response: `⚠️ AI service error: ${errorMessage}`
             });
         }
 
