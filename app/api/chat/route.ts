@@ -79,7 +79,7 @@ If the user has no expenses, tell them to add expenses first.`;
 
         while (retryCount <= maxRetries) {
             try {
-                process.stdout.write(`Calling Google Gemma 3 27B (free) (Attempt ${retryCount + 1})...\n`);
+                process.stdout.write(`Calling Z.AI GLM 4.5 Air (free) (Attempt ${retryCount + 1})...\n`);
 
                 const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                     method: "POST",
@@ -90,7 +90,7 @@ If the user has no expenses, tell them to add expenses first.`;
                         "X-Title": "CoinTrack Chat"
                     },
                     body: JSON.stringify({
-                        model: "google/gemma-3-27b-it:free",
+                        model: "z-ai/glm-4.5-air:free",
                         messages: [
                             { role: "system", content: systemPrompt },
                             { role: "user", content: userPrompt }
